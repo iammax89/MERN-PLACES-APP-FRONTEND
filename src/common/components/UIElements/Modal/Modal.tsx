@@ -8,8 +8,8 @@ interface ModalProps {
   show: boolean;
   onCancel: () => void;
   header: string;
-  contentClass: string;
-  footerClass: string;
+  contentClass?: string;
+  footerClass?: string;
   footer: JSX.Element;
 }
 export const Modal: React.FC<ModalProps> = ({

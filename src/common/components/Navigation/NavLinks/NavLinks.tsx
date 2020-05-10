@@ -7,8 +7,7 @@ interface NavLinksProps {
   id?: string;
 }
 export const NavLinks: React.FC<NavLinksProps> = ({ id }) => {
-  const { isLoggedIn, logout } = useContext(AuthContext);
-
+  const { isLoggedIn, logout, userId } = useContext(AuthContext);
   return (
     <ul className="nav-links">
       <li>
@@ -18,7 +17,7 @@ export const NavLinks: React.FC<NavLinksProps> = ({ id }) => {
       </li>
       {isLoggedIn && (
         <li>
-          <NavLink to={`/u1/places`}>My Places</NavLink>
+          <NavLink to={`/${userId}/places`}>My Places</NavLink>
         </li>
       )}
       {isLoggedIn && (

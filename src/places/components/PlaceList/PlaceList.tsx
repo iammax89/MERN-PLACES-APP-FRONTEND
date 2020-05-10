@@ -7,8 +7,12 @@ import { Button } from "../../../common/components/FormElements/Button/Button";
 
 interface PlaceListProps {
   items: IPlace[];
+  onDeletePlace: (id: string) => void;
 }
-export const PlaceList: React.FC<PlaceListProps> = ({ items }) => {
+export const PlaceList: React.FC<PlaceListProps> = ({
+  items,
+  onDeletePlace,
+}) => {
   const places = items.map((place: IPlace) => (
     <PlaceItem
       key={place.id}
@@ -19,6 +23,7 @@ export const PlaceList: React.FC<PlaceListProps> = ({ items }) => {
       address={place.address}
       creatorId={place.creator}
       coordinates={place.location}
+      onDelete={onDeletePlace}
     />
   ));
   if (!items.length) {

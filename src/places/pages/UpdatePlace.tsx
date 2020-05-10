@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { PLACES } from "./UserPlaces";
+import React, { useEffect, useState, Fragment, useContext } from "react";
+import { useParams, useHistory } from "react-router-dom";
 import { Input } from "../../common/components/FormElements/Input/Input";
 import { Button } from "../../common/components/FormElements/Button/Button";
 import {
@@ -9,11 +8,19 @@ import {
 } from "../../common/util/validators";
 import "./NewPlace/PlaceForm.scss";
 import { useForm } from "../../common/hooks/form-hook";
-import Card from "../../common/components/UIElements/Card/Card";
+import { IPlace } from "../../interfaces/place.interface";
+import { useHttpClient } from "../../common/hooks/http-hook";
+import { map } from "rxjs/operators";
+import { EMPTY } from "rxjs";
+import Spinner from "../../common/components/UIElements/Spinner/Spinner";
+import ErrorModal from "../../common/components/UIElements/ErrorModal/ErrorModal";
+import { AuthContext } from "../../common/context/auth-context";
 
 export const UpdatePlace: React.FC = () => {
+  const { userId } = useContext(AuthContext);
   const placeId = useParams<any>().placeId;
-  const [isLoading, setIsLoading] = useState(true);
+  const [identifyPlace, setIdentifyPlace] = useState<IPlace>();
+  const { isLoading, error, sendRequest$, clearError } = useHttpClient();
   const [formState, inputHandler, setFormData] = useForm(
     {
       title: {
@@ -27,37 +34,53 @@ export const UpdatePlace: React.FC = () => {
     },
     false
   );
-  const identifyPlace = PLACES.find((place) => (place.id = placeId));
-
+  const history = useHistory();
   useEffect(() => {
-    if (identifyPlace) {
-      setFormData(
-        {
-          title: {
-            value: identifyPlace?.title,
-            isValid: true,
-          },
-          describtion: {
-            value: identifyPlace?.describtion,
-            isValid: true,
-          },
+    sendRequest$(`http://localhost:5000/api/places/${placeId}`, "GET")
+      .pipe(map((data) => data.response["place"]))
+      .subscribe(
+        (place: IPlace) => {
+          setIdentifyPlace(place);
+          setFormData(
+            {
+              title: {
+                value: place.title,
+                isValid: true,
+              },
+              describtion: {
+                value: place.describtion,
+                isValid: true,
+              },
+            },
+            true
+          );
         },
-        true
+        () => EMPTY
       );
-      setIsLoading(false);
-    }
-  }, [identifyPlace, setFormData]);
+  }, [sendRequest$, placeId, setFormData]);
 
   const formSubmitHandler = (event: React.FormEvent) => {
     event.preventDefault();
-    console.log(formState);
+    const editedPlace = {
+      title: formState.inputs.title.value,
+      describtion: formState.inputs.describtion.value,
+    };
+    sendRequest$(
+      `http://localhost:5000/api/places/${placeId}`,
+      "PATCH",
+      JSON.stringify(editedPlace),
+      { "Content-Type": "application/json" }
+    )
+      .pipe(map((data) => data.response["updatedPlace"]))
+      .subscribe(
+        () => history.push(`/${userId}/places`),
+        () => EMPTY
+      );
   };
-  if (!identifyPlace) {
+  if (!identifyPlace || isLoading) {
     return (
       <div className="center">
-        <Card>
-          <h2>Could not find a place!</h2>
-        </Card>
+        <Spinner asOverlay />
       </div>
     );
   }
@@ -71,8 +94,8 @@ export const UpdatePlace: React.FC = () => {
         validators={[VALIDATOR_REQUIRE()]}
         errorText="Please enter a valid title."
         onInput={inputHandler}
-        initialValue={formState.inputs.title.value}
-        initialValid={formState.inputs.title.isValid}
+        initialValue={identifyPlace.title}
+        initialValid={true}
       />
       <Input
         id="describtion"
@@ -81,14 +104,19 @@ export const UpdatePlace: React.FC = () => {
         validators={[VALIDATOR_MINLENGTH(5)]}
         errorText="Please enter at list 5 symbols."
         onInput={inputHandler}
-        initialValue={formState.inputs.describtion.value}
-        initialValid={formState.inputs.describtion.isValid}
+        initialValue={identifyPlace.describtion}
+        initialValid={true}
       />
       <Button type="submit" disabled={!formState.isValid}>
         UPDATE PLACE
       </Button>
     </form>
   );
-  const loading: JSX.Element = <div className="center">Loading...</div>;
-  return !isLoading ? form : loading;
+
+  return (
+    <Fragment>
+      {<ErrorModal error={error} onClear={clearError} />}
+      {!isLoading && form}
+    </Fragment>
+  );
 };

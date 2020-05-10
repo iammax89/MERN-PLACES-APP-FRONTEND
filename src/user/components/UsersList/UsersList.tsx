@@ -12,9 +12,9 @@ export const UsersList: React.FC<UsersListProps> = ({ items }) => {
     <UserItem
       key={user.id}
       id={user.id}
-      image={user.image}
+      image={user.imageUrl}
       name={user.name}
-      placesCount={user.places}
+      placesCount={user.places?.length}
     />
   ));
   if (!items.length) {

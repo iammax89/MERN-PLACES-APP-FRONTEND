@@ -5,6 +5,10 @@ import { Button } from "../../../common/components/FormElements/Button/Button";
 import { Modal } from "../../../common/components/UIElements/Modal/Modal";
 import { Map } from "../../../common/components/UIElements/Map/Map";
 import { AuthContext } from "../../../common/context/auth-context";
+import { useHttpClient } from "../../../common/hooks/http-hook";
+import { EMPTY } from "rxjs";
+import ErrorModal from "../../../common/components/UIElements/ErrorModal/ErrorModal";
+import Spinner from "../../../common/components/UIElements/Spinner/Spinner";
 
 interface PlaceItemProps {
   key: string;
@@ -18,6 +22,7 @@ interface PlaceItemProps {
     lat: number;
     lng: number;
   };
+  onDelete: (id: string) => void;
 }
 export const PlaceItem: React.FC<PlaceItemProps> = ({
   id,
@@ -26,16 +31,23 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
   address,
   describtion,
   coordinates,
+  creatorId,
+  onDelete,
 }) => {
   const [showGoogleMap, setShowGoogleMap] = useState<boolean>(false);
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
+  const { isLoading, error, sendRequest$, clearError } = useHttpClient();
   const confirmDeleteHandler = () => {
-    console.log("Deleted");
     setShowConfirm(false);
+    sendRequest$(`http://localhost:5000/api/places/${id}`, "DELETE").subscribe(
+      () => onDelete(id),
+      () => EMPTY
+    );
   };
-  const { isLoggedIn } = useContext(AuthContext);
+  const { userId } = useContext(AuthContext);
   return (
     <Fragment>
+      <ErrorModal error={error} onClear={clearError} />
       <Modal
         show={showGoogleMap}
         onCancel={() => setShowGoogleMap(false)}
@@ -69,6 +81,7 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
       </Modal>
       <li className="list-item">
         <Card className="place-item__content">
+          {isLoading && <Spinner asOverlay />}
           <div className="place-item__image">
             <img src={`${image}`} alt={`${title}`} />
           </div>
@@ -81,7 +94,7 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
             <Button inverse onClick={() => setShowGoogleMap(true)}>
               VIEW ON MAP
             </Button>
-            {isLoggedIn && (
+            {creatorId === userId && (
               <Fragment>
                 <Button to={`/places/${id}`}>EDIT</Button>
                 <Button danger onClick={() => setShowConfirm(true)}>

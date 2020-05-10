@@ -1,6 +1,10 @@
 interface State {
   inputs:
     | {
+        name?: {
+          value: string;
+          isValid: boolean;
+        };
         email?: {
           value: string;
           isValid: boolean;
