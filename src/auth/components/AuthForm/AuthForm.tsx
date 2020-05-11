@@ -15,6 +15,7 @@ import Spinner from "../../../common/components/UIElements/Spinner/Spinner";
 import ErrorModal from "../../../common/components/UIElements/ErrorModal/ErrorModal";
 import { useHttpClient } from "../../../common/hooks/http-hook";
 import { EMPTY } from "rxjs";
+import { ImageUpload } from "../../../common/components/FormElements/ImageUpload/ImageUpload";
 export const AuthForm: React.FC = () => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
   const { isLoading, error, sendRequest$, clearError } = useHttpClient();
@@ -34,6 +35,7 @@ export const AuthForm: React.FC = () => {
   );
 
   const formSubmitHandler = (event: React.FormEvent) => {
+    console.log(formState.inputs);
     event.preventDefault();
     if (isLogin) {
       const existedUser = {
@@ -79,6 +81,10 @@ export const AuthForm: React.FC = () => {
             value: null,
             isValid: null,
           },
+          image: {
+            value: null,
+            isValid: null,
+          },
         },
         formState.inputs.email.isValid && formState.inputs.password.isValid
       );
@@ -88,6 +94,10 @@ export const AuthForm: React.FC = () => {
         {
           ...formState.inputs,
           name: {
+            value: "",
+            isValid: false,
+          },
+          image: {
             value: "",
             isValid: false,
           },
@@ -116,6 +126,7 @@ export const AuthForm: React.FC = () => {
               onInput={inputHandler}
             />
           )}
+          {!isLogin && <ImageUpload id="image" center onInput={inputHandler} />}
           <Input
             id="email"
             type="email"
