@@ -45,6 +45,7 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
     );
   };
   const { userId } = useContext(AuthContext);
+  const imageStorageUrl = "http://localhost:5000";
   return (
     <Fragment>
       <ErrorModal error={error} onClear={clearError} />
@@ -83,7 +84,7 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
         <Card className="place-item__content">
           {isLoading && <Spinner asOverlay />}
           <div className="place-item__image">
-            <img src={`${image}`} alt={`${title}`} />
+            <img src={`${imageStorageUrl}/${image}`} alt={`${title}`} />
           </div>
           <div className="place-item__info">
             {title}

@@ -14,6 +14,7 @@ import { EMPTY } from "rxjs";
 import Spinner from "../../../common/components/UIElements/Spinner/Spinner";
 import ErrorModal from "../../../common/components/UIElements/ErrorModal/ErrorModal";
 import { useHistory } from "react-router-dom";
+import { ImageUpload } from "../../../common/components/FormElements/ImageUpload/ImageUpload";
 
 export const NewPlace: React.FC = () => {
   const { userId } = useContext(AuthContext);
@@ -21,6 +22,10 @@ export const NewPlace: React.FC = () => {
   const [formState, inputHandler] = useForm(
     {
       title: {
+        value: "",
+        isValid: false,
+      },
+      image: {
         value: "",
         isValid: false,
       },
@@ -38,17 +43,18 @@ export const NewPlace: React.FC = () => {
   const history = useHistory();
   const formSubmitHandler = (event: React.FormEvent) => {
     event.preventDefault();
-    const newPlace = {
-      title: formState.inputs.title.value,
-      describtion: formState.inputs.describtion.value,
-      address: formState.inputs.address.value,
-      creator: userId,
-    };
+
+    const formData = new FormData();
+    formData.append("title", formState.inputs.title.value);
+    formData.append("describtion", formState.inputs.describtion.value);
+    formData.append("address", formState.inputs.address.value);
+    formData.append("creator", userId);
+    formData.append("image", formState.inputs.image.value);
+    console.log(formState.inputs);
     sendRequest$(
       "http://localhost:5000/api/places",
       "POST",
-      JSON.stringify(newPlace),
-      { "Content-Type": "application/json" }
+      formData
     ).subscribe(
       () => history.push(`/${userId}/places`),
       () => EMPTY
@@ -69,6 +75,12 @@ export const NewPlace: React.FC = () => {
           validators={[VALIDATOR_REQUIRE()]}
           errorText="Please enter a valid title."
           onInput={inputHandler}
+        />
+        <ImageUpload
+          id="image"
+          center
+          onInput={inputHandler}
+          errorText="Please upload the image"
         />
         <Input
           id="describtion"

@@ -54,17 +54,12 @@ export const AuthForm: React.FC = () => {
           () => EMPTY
         );
     } else {
-      const newUser = {
-        name: formState.inputs.name.value,
-        email: formState.inputs.email.value,
-        password: formState.inputs.password.value,
-      };
-      sendRequest$(
-        "http://localhost:5000/api/users/signup",
-        "POST",
-        JSON.stringify(newUser),
-        { "Content-Type": "application/json" }
-      )
+      const formData = new FormData();
+      formData.append("name", formState.inputs.name.value);
+      formData.append("email", formState.inputs.email.value);
+      formData.append("password", formState.inputs.password.value);
+      formData.append("image", formState.inputs.image.value);
+      sendRequest$("http://localhost:5000/api/users/signup", "POST", formData)
         .pipe(map((data) => data.response["user"]))
         .subscribe(
           (user) => login(user.id),
@@ -126,7 +121,14 @@ export const AuthForm: React.FC = () => {
               onInput={inputHandler}
             />
           )}
-          {!isLogin && <ImageUpload id="image" center onInput={inputHandler} />}
+          {!isLogin && (
+            <ImageUpload
+              id="image"
+              center
+              onInput={inputHandler}
+              errorText="Please upload the image"
+            />
+          )}
           <Input
             id="email"
             type="email"

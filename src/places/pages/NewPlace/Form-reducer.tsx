@@ -25,6 +25,10 @@ interface State {
           value: string;
           isValid: boolean;
         };
+        image?: {
+          value: File;
+          isValid: boolean;
+        };
       }
     | any;
 
