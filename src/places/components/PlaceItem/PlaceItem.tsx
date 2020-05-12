@@ -37,15 +37,23 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
   const [showGoogleMap, setShowGoogleMap] = useState<boolean>(false);
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const { isLoading, error, sendRequest$, clearError } = useHttpClient();
+  const { token } = useContext(AuthContext);
   const confirmDeleteHandler = () => {
     setShowConfirm(false);
-    sendRequest$(`http://localhost:5000/api/places/${id}`, "DELETE").subscribe(
+    sendRequest$(
+      `${process.env.REACT_APP_API_URL}/places/${id}`,
+      "DELETE",
+      null,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    ).subscribe(
       () => onDelete(id),
       () => EMPTY
     );
   };
   const { userId } = useContext(AuthContext);
-  const imageStorageUrl = "http://localhost:5000";
+  const imageStorageUrl = `${process.env.REACT_APP_ASSET_URL}`;
   return (
     <Fragment>
       <ErrorModal error={error} onClear={clearError} />
@@ -87,9 +95,11 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
             <img src={`${imageStorageUrl}/${image}`} alt={`${title}`} />
           </div>
           <div className="place-item__info">
-            {title}
-            {address}
-            {describtion}
+            <p>
+              <strong>{title}</strong>
+            </p>
+            <small>{address}</small>
+            <p>{describtion}</p>
           </div>
           <div className="place-item__actions">
             <Button inverse onClick={() => setShowGoogleMap(true)}>

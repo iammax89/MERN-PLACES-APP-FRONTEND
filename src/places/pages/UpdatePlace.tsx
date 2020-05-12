@@ -16,8 +16,8 @@ import Spinner from "../../common/components/UIElements/Spinner/Spinner";
 import ErrorModal from "../../common/components/UIElements/ErrorModal/ErrorModal";
 import { AuthContext } from "../../common/context/auth-context";
 
-export const UpdatePlace: React.FC = () => {
-  const { userId } = useContext(AuthContext);
+const UpdatePlace: React.FC = () => {
+  const { userId, token } = useContext(AuthContext);
   const placeId = useParams<any>().placeId;
   const [identifyPlace, setIdentifyPlace] = useState<IPlace>();
   const { isLoading, error, sendRequest$, clearError } = useHttpClient();
@@ -36,7 +36,7 @@ export const UpdatePlace: React.FC = () => {
   );
   const history = useHistory();
   useEffect(() => {
-    sendRequest$(`http://localhost:5000/api/places/${placeId}`, "GET")
+    sendRequest$(`${process.env.REACT_APP_API_URL}/places/${placeId}`, "GET")
       .pipe(map((data) => data.response["place"]))
       .subscribe(
         (place: IPlace) => {
@@ -66,10 +66,13 @@ export const UpdatePlace: React.FC = () => {
       describtion: formState.inputs.describtion.value,
     };
     sendRequest$(
-      `http://localhost:5000/api/places/${placeId}`,
+      `${process.env.REACT_APP_API_URL}/places/${placeId}`,
       "PATCH",
       JSON.stringify(editedPlace),
-      { "Content-Type": "application/json" }
+      {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      }
     )
       .pipe(map((data) => data.response["updatedPlace"]))
       .subscribe(
@@ -120,3 +123,4 @@ export const UpdatePlace: React.FC = () => {
     </Fragment>
   );
 };
+export default UpdatePlace;

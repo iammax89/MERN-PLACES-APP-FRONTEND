@@ -16,8 +16,8 @@ import ErrorModal from "../../../common/components/UIElements/ErrorModal/ErrorMo
 import { useHistory } from "react-router-dom";
 import { ImageUpload } from "../../../common/components/FormElements/ImageUpload/ImageUpload";
 
-export const NewPlace: React.FC = () => {
-  const { userId } = useContext(AuthContext);
+const NewPlace: React.FC = () => {
+  const { userId, token } = useContext(AuthContext);
   const { isLoading, error, sendRequest$, clearError } = useHttpClient();
   const [formState, inputHandler] = useForm(
     {
@@ -48,14 +48,11 @@ export const NewPlace: React.FC = () => {
     formData.append("title", formState.inputs.title.value);
     formData.append("describtion", formState.inputs.describtion.value);
     formData.append("address", formState.inputs.address.value);
-    formData.append("creator", userId);
     formData.append("image", formState.inputs.image.value);
     console.log(formState.inputs);
-    sendRequest$(
-      "http://localhost:5000/api/places",
-      "POST",
-      formData
-    ).subscribe(
+    sendRequest$(`${process.env.REACT_APP_API_URL}/places`, "POST", formData, {
+      Authorization: `Bearer ${token}`,
+    }).subscribe(
       () => history.push(`/${userId}/places`),
       () => EMPTY
     );
@@ -105,3 +102,5 @@ export const NewPlace: React.FC = () => {
     </Fragment>
   );
 };
+
+export default NewPlace;

@@ -16,7 +16,7 @@ export const UserItem: React.FC<UserItemProps> = ({
   name,
   placesCount,
 }) => {
-  const imageStorageUrl = "http://localhost:5000";
+  const imageStorageUrl = `${process.env.REACT_APP_ASSET_URL}`;
   return (
     <li className="user-item">
       <Card className="user-item__content">

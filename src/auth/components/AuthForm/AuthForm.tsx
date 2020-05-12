@@ -35,7 +35,6 @@ export const AuthForm: React.FC = () => {
   );
 
   const formSubmitHandler = (event: React.FormEvent) => {
-    console.log(formState.inputs);
     event.preventDefault();
     if (isLogin) {
       const existedUser = {
@@ -43,14 +42,14 @@ export const AuthForm: React.FC = () => {
         password: formState.inputs.password.value,
       };
       sendRequest$(
-        "http://localhost:5000/api/users/login",
+        `${process.env.REACT_APP_API_URL}/users/login`,
         "POST",
         JSON.stringify(existedUser),
         { "Content-Type": "application/json" }
       )
-        .pipe(map((data) => data.response["user"]))
+        .pipe(map((data) => data.response))
         .subscribe(
-          (user) => login(user.id),
+          (res) => login(res.userId, res.token),
           () => EMPTY
         );
     } else {
@@ -59,11 +58,15 @@ export const AuthForm: React.FC = () => {
       formData.append("email", formState.inputs.email.value);
       formData.append("password", formState.inputs.password.value);
       formData.append("image", formState.inputs.image.value);
-      sendRequest$("http://localhost:5000/api/users/signup", "POST", formData)
-        .pipe(map((data) => data.response["user"]))
+      sendRequest$(
+        `${process.env.REACT_APP_API_URL}/users/signup`,
+        "POST",
+        formData
+      )
+        .pipe(map((data) => data.response))
         .subscribe(
-          (user) => login(user.id),
-          () => EMPTY
+          (res) => login(res.userId, res.token),
+          (err) => console.log(err)
         );
     }
   };

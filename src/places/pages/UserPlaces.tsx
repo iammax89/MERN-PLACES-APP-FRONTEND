@@ -8,12 +8,15 @@ import { map } from "rxjs/operators";
 import ErrorModal from "../../common/components/UIElements/ErrorModal/ErrorModal";
 import Spinner from "../../common/components/UIElements/Spinner/Spinner";
 
-export const UserPlaces: React.FC = () => {
+const UserPlaces: React.FC = () => {
   const [places, setPlaces] = useState<IPlace[]>([]);
   const { isLoading, error, sendRequest$, clearError } = useHttpClient();
   const userId = useParams<any>().userId;
   useEffect(() => {
-    sendRequest$(`http://localhost:5000/api/places/user/${userId}`, "GET")
+    sendRequest$(
+      `${process.env.REACT_APP_API_URL}/places/user/${userId}`,
+      "GET"
+    )
       .pipe(map((data) => data.response["userPlaces"]))
       .subscribe(
         (places: IPlace[]) => setPlaces(places),
@@ -37,3 +40,4 @@ export const UserPlaces: React.FC = () => {
     </Fragment>
   );
 };
+export default UserPlaces;
